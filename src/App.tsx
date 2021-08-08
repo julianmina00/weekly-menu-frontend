@@ -1,35 +1,34 @@
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
+import { BrowserRouter as Router, Link } from 'react-router-dom';
 import { Button, Grid } from '@material-ui/core';
 
-import Menu from './entities/menu/menu';
 import './App.css';
+import Menu from './entities/menu/menu';
+import ErrorBoundary from './shared/error/error-boundary';
+import AppRoutes from './routes';
 
 function App() {
-  const [showCreate, setShowCreate] = React.useState(false);
-  
-  const createToggle = () => {
-    setShowCreate(!showCreate);
-  };
+  const buttons = () => {
+    return (
+      <div>
+        <Grid container spacing={3} style={{padding: "40px"}}>
+          <Grid item xs={12}>
+            <Link to="/menu/view/create">Crear Menu</Link>
+          </Grid>
+          <Grid item xs={12}>
+            <Link to="/menu/view/current">Ver menu</Link>
+          </Grid>        
+        </Grid>
+      </div>
+    );
+  }
 
   return (
     <Router>
-      <div>
-        {showCreate ? (
-          <Menu />
-        ) : (        
-          <div>
-            <Grid container spacing={3} style={{padding: "40px"}}>
-              <Grid item xs={12}>
-                <Button variant="outlined" color="primary" onClick={createToggle}>Crear Menu</Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button variant="outlined" color="primary">Ver Menu</Button>
-              </Grid>        
-            </Grid>
-          </div>
-        )}
-      </div>
+      <ErrorBoundary>
+        {buttons()}
+        <AppRoutes />
+      </ErrorBoundary>
     </Router>
   );
 }

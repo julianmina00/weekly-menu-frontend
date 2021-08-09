@@ -1,9 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Link } from 'react-router-dom';
-import { Button, Grid } from '@material-ui/core';
+import { Grid, Paper } from '@material-ui/core';
 
 import './App.css';
-import Menu from './entities/menu/menu';
 import ErrorBoundary from './shared/error/error-boundary';
 import AppRoutes from './routes';
 
@@ -27,7 +26,9 @@ function App() {
     <Router>
       <ErrorBoundary>
         {buttons()}
-        <AppRoutes />
+        <Paper variant="outlined" square style={{width: '400px', margin: '50px'}}>
+          <AppRoutes />
+        </Paper>
       </ErrorBoundary>
     </Router>
   );

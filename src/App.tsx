@@ -12,10 +12,10 @@ function App() {
       <div>
         <Grid container spacing={3} style={{padding: "40px"}}>
           <Grid item xs={12}>
-            <Link to="/menu/view/create">Crear Menu</Link>
+            <Link to="/menu/new">Crear Menu</Link>
           </Grid>
           <Grid item xs={12}>
-            <Link to="/menu/view/current">Ver menu</Link>
+            <Link to="/menu/current">Ver menu</Link>
           </Grid>        
         </Grid>
       </div>

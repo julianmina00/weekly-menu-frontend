@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'
 import { defaultMeal, IMeal } from '../../model/meal.model';
 import { TextField, Button, Grid } from '@material-ui/core';
 
@@ -43,6 +44,7 @@ const Meal = (props: IMealProps) => {
             variant="filled"
             required
             value={meal.name}
+            style={{width: '100%'}}
             onChange={e => setMealName(e.target.value)}
           />
         </Grid>
@@ -52,12 +54,17 @@ const Meal = (props: IMealProps) => {
             variant="filled"
             required
             value={meal.chef}
+            style={{width: '100%'}}
             onChange={e => setMealChef(e.target.value)}
           />
         </Grid>        
-        <Grid item xs={12}>
-          <Button variant="contained" onClick={handleClose}> Cancelar </Button>
-          <Button type="submit" variant="contained" color="primary"> Crear </Button>
+        <Grid item xs={6}>
+          <Button type="submit" variant="contained" fullWidth color="primary"> Crear </Button>
+        </Grid>
+        <Grid item xs={6}>
+          <Link to="/menu/new">
+            <Button variant="contained" fullWidth onClick={handleClose}> Cancelar </Button>
+          </Link>
         </Grid>
       </Grid>
     </form>

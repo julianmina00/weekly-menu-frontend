@@ -167,6 +167,7 @@ const MenuStepper = (props: IMenuProps) => {
   }
 
   return (
+    <div>
     <Grid container spacing={3} style={{padding: "40px"}}>
       <Grid item xs={12}>
         <Stepper alternativeLabel nonLinear activeStep={activeStep}>
@@ -184,18 +185,21 @@ const MenuStepper = (props: IMenuProps) => {
       <Grid item xs={12}>
         {stepRender(activeStep)}
       </Grid>
-      <Grid item xs={4}>
+    </Grid>
+    <Grid container spacing={3} style={{padding: "40px"}}> 
+      <Grid item xs>
         <Button variant="outlined" color="primary" disabled={activeStep === 0} onClick={handleBack}>Back</Button>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs>
         <Button variant="outlined" color="primary" onClick={handleBack}>Aditional</Button>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs>
         <Button variant="outlined" color="primary" onClick={handleComplete}>
           {completedSteps() === totalSteps() - 1 ? 'Finish' : 'Title'}
         </Button>
       </Grid>
     </Grid>
+    </div>
   );
 }
 

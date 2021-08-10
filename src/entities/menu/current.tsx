@@ -61,6 +61,4 @@ const MenuCurrent = (props: IMenuCurrentProps) => {
   );
 }
 
-
-
 export default MenuCurrent;

@@ -1,4 +1,5 @@
 export interface IMeal {
+    id?: string;
     name?: string;
     chef?: string;
     date?: Date;

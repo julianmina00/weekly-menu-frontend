@@ -1,31 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import { Button, Grid } from '@material-ui/core';
 import {
   KeyboardDatePicker, MuiPickersUtilsProvider,
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import { IMeal } from '../../model/meal.model';
 import MealList from '../meal/meal-list';
-import Meal from '../meal/meal';
 import { Link } from 'react-router-dom';
+import { IRootState } from '../../shared/reducers';
 
-
-export interface IMenuProps {}
+export type IMenuProps = StateProps;
 
 const Menu = (props: IMenuProps) => {
-  const [meals, setMeals] = useState([] as ReadonlyArray<IMeal>);
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const { meals } = props;
 
-  useEffect(() => {
-    console.log(meals);
-  }, [meals]);
-
-  const addMeal = (meal: IMeal) => {
-    const currentMeals = [ ...meals ];
-    currentMeals.push(meal);
-    setMeals(currentMeals);
-  }
-  
   const handleDateChange = (date: Date | null) => {
     setSelectedDate(date);
   };
@@ -66,4 +55,10 @@ const Menu = (props: IMenuProps) => {
   );
 }
 
-export default Menu;
+const mapStateToProps = ({ meal } : IRootState) => ({
+  meals: meal.entities
+});
+
+type StateProps = ReturnType<typeof mapStateToProps>;
+
+export default connect(mapStateToProps)(Menu);

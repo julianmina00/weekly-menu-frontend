@@ -8,6 +8,7 @@ import DateFnsUtils from '@date-io/date-fns';
 import MealList from '../meal/meal-list';
 import { Link } from 'react-router-dom';
 import { IRootState } from '../../shared/reducers';
+import HorizontalNonLinearAlternativeLabelStepper from './menu-stepper';
 
 export type IMenuProps = StateProps;
 
@@ -19,39 +20,44 @@ const Menu = (props: IMenuProps) => {
     setSelectedDate(date);
   };
 
+  const createMenu = () => {
+    return (
+      <Grid container spacing={3} style={{padding: "40px"}}>
+        <Grid item xs={12}>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+                disableToolbar
+                variant="inline"
+                format="MM/dd/yyyy"
+                margin="normal"
+                id="date-picker-inline"
+                label="Dia inicial"
+                value={selectedDate}
+                onChange={handleDateChange}
+                KeyboardButtonProps={{
+                  'aria-label': 'change date',
+                }}
+              />
+          </MuiPickersUtilsProvider>
+        </Grid>
+        <Grid item xs={12}>
+          {meals?.length > 0 && (
+            <MealList meals={meals} />
+          )}
+        </Grid>
+        <Grid item xs={6}>
+          <Link to="/meal/new">
+            <Button variant="outlined" color="primary">Añadir comida</Button>
+          </Link>
+        </Grid>
+        <Grid item xs={6}>
+          <Button variant="outlined" color="primary">Guardar Menú</Button>
+        </Grid>
+      </Grid>
+    );
+  }
   return (
-    <Grid container spacing={3} style={{padding: "40px"}}>
-      <Grid item xs={12}>
-        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-          <KeyboardDatePicker
-              disableToolbar
-              variant="inline"
-              format="MM/dd/yyyy"
-              margin="normal"
-              id="date-picker-inline"
-              label="Dia inicial"
-              value={selectedDate}
-              onChange={handleDateChange}
-              KeyboardButtonProps={{
-                'aria-label': 'change date',
-              }}
-            />
-        </MuiPickersUtilsProvider>
-      </Grid>
-      <Grid item xs={12}>
-        {meals?.length > 0 && (
-          <MealList meals={meals} />
-        )}
-      </Grid>
-      <Grid item xs={6}>
-        <Link to="/meal/new">
-          <Button variant="outlined" color="primary">Añadir comida</Button>
-        </Link>
-      </Grid>
-      <Grid item xs={6}>
-        <Button variant="outlined" color="primary">Guardar Menú</Button>
-      </Grid>
-    </Grid>
+    <HorizontalNonLinearAlternativeLabelStepper />
   );
 }
 

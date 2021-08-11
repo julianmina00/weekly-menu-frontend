@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { Link, useHistory } from 'react-router-dom';
 import { 
   Button, Grid, TextField, Checkbox, TableContainer, Table, TableBody, 
-  TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton 
+  TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton, CardContent, Card, Typography 
 } from '@material-ui/core';
 import { Edit as EditIcon, Delete as DeleteIcon, DragIndicator as DragIndicatorIcon } from '@material-ui/icons';
 import {
@@ -139,6 +139,34 @@ const MenuStepper = (props: IMenuProps) => {
     console.log('Drag ended...');
     console.log(result);
     console.log('====================================');
+    if (!result.destination) return;
+    const { source, destination } = result;
+    const mealsArray = [ ...meals ];
+    const [removed] = mealsArray.splice(source.index, 1);
+    mealsArray.splice(destination.index, 0, removed);
+    
+    // const item = itemById(result.draggableId)
+    // const itemIndex = destination.index
+    // const prev = items[itemIndex-1];
+    // const next = items[itemIndex+1];
+    // let prevPos = 0;
+    // if(prev !== undefined){
+    //   prevPos = prev.position;
+    // }
+    // let nextPos = undefined;
+    // if(next !== undefined){
+    //   nextPos = next.position;
+    // }
+    // let itemPos: number;
+    // if(nextPos === undefined){
+    //   itemPos = prevPos + 1;
+    // }
+    // else{
+    //   itemPos = prevPos + (nextPos - prevPos)/2.0;
+    // }
+    // item.position = itemPos
+    // item.changed = true;
+    // props.updateEntities(item);
   }
 
   const draggableName = (id: number) => "draggable-"+String(id);
@@ -157,25 +185,19 @@ const MenuStepper = (props: IMenuProps) => {
                             <Draggable key={draggableName(index)} draggableId={draggableName(index)} index={index} >
                               {(draggableProvided, draggableSnapshot) => {
                                 return (
-                                  <div 
-                                    ref={draggableProvided.innerRef}
-                                    {...draggableProvided.draggableProps}
-                                    {...draggableProvided.dragHandleProps}
-                                    style={{
-                                      userSelect: "none",
-                                      padding: 10,
-                                      margin: "0 0 8px 0",
-                                      minHeight: "10px",
-                                      borderTop: "1px solid #DFD7CA",
-                                      backgroundColor: draggableSnapshot.isDragging
-                                        ? "grey"
-                                        : "white",
-                                      color: "black",
-                                      ...draggableProvided.draggableProps.style
-                                    }}
-                                  >
-                                    <DragIndicatorIcon fontSize="medium" />
-                                    {meal.name}
+                                  <div ref={draggableProvided.innerRef}
+                                  {...draggableProvided.draggableProps}
+                                  {...draggableProvided.dragHandleProps}>
+                                    <Paper elevation={3} variant="outlined" square style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        flexWrap: 'wrap',
+                                        padding: '10px',
+                                        margin: '5px 0px'
+                                      }}>
+                                      <DragIndicatorIcon fontSize="medium" />
+                                      <span>{meal.name} ({meal.chef})</span>
+                                    </Paper>
                                   </div>
                                 );
                               }}

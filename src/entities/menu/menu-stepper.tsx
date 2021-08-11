@@ -5,7 +5,7 @@ import {
   Button, Grid, TextField, Checkbox, TableContainer, Table, TableBody, 
   TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton 
 } from '@material-ui/core';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@material-ui/icons';
+import { Edit as EditIcon, Delete as DeleteIcon, DragIndicator as DragIndicatorIcon } from '@material-ui/icons';
 import {
   KeyboardDatePicker, MuiPickersUtilsProvider,
 } from '@material-ui/pickers';
@@ -173,7 +173,8 @@ const MenuStepper = (props: IMenuProps) => {
                                       color: "black",
                                       ...draggableProvided.draggableProps.style
                                     }}
-                                  >                                      
+                                  >
+                                    <DragIndicatorIcon fontSize="medium" />
                                     {meal.name}
                                   </div>
                                 );

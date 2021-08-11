@@ -1,27 +1,31 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { Link } from 'react-router-dom';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepButton from '@material-ui/core/StepButton';
-import { TextField, Checkbox, TableContainer, Table, TableBody, TableRow, TableCell, Paper, IconButton } from '@material-ui/core';
-import { Button, Grid } from '@material-ui/core';
+import { Link, useHistory } from 'react-router-dom';
+import { 
+  Button, Grid, TextField, Checkbox, TableContainer, Table, TableBody, 
+  TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton 
+} from '@material-ui/core';
+import { Edit as EditIcon, Delete as DeleteIcon } from '@material-ui/icons';
 import {
   KeyboardDatePicker, MuiPickersUtilsProvider,
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
 
-import MealList from '../meal/meal-list';
 import { IRootState } from '../../shared/reducers';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 function getSteps() {
   return ['Añadir comidas', 'Ordenar', 'Guardar'];
 }
 
-interface StepRender {
+interface IButtonAction {
+  name: string;
+  action(): void;
+}
+
+interface IStepAction {
   title: string;
+  buttons: IButtonAction[];
   render(): JSX.Element;
 }
 
@@ -33,82 +37,7 @@ const MenuStepper = (props: IMenuProps) => {
   const steps = getSteps();
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const { meals } = props;
-
-  const handleDateChange = (date: Date | null) => {
-    setSelectedDate(date);
-  };
-
-
-  const renders: StepRender[] = [
-    {title: "Crear", render: () => {
-      return (
-        <div>
-          Hola Mundo;
-        </div>
-      );
-    }}
-  ];
-
-  const mealTable  = () => {
-    return (
-      <TableContainer component={Paper}>
-        <Table aria-label="a dense table">
-          <TableBody>
-            {meals.map((meal) => (
-              <TableRow key={meal.name}>
-                <TableCell>{`${meal.name} (${meal.chef})`}</TableCell>
-                <TableCell align="right" >
-                  <IconButton color="primary">
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton color="secondary">
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>  
-    );
-  }
-
-  const createMenu = () => {
-    return (
-      <Grid container spacing={3} style={{padding: "40px"}}>
-        <Grid item xs={12}>
-          <MuiPickersUtilsProvider utils={DateFnsUtils}>
-            <KeyboardDatePicker
-                disableToolbar
-                variant="inline"
-                format="MM/dd/yyyy"
-                margin="normal"
-                id="date-picker-inline"
-                label="Dia inicial"
-                value={selectedDate}
-                onChange={handleDateChange}
-                KeyboardButtonProps={{
-                  'aria-label': 'change date',
-                }}
-              />
-          </MuiPickersUtilsProvider>
-        </Grid>
-        <Grid item xs={12}>
-          {mealTable()}
-        </Grid>
-        <Grid item xs={6}>
-          <Link to="/meal/new">
-            <Button variant="outlined" color="primary">Añadir comida</Button>
-          </Link>
-        </Grid>
-        <Grid item xs={6}>
-          <Button variant="outlined" color="primary">Guardar Menú</Button>
-        </Grid>
-      </Grid>
-    );
-  }
-  
-
+  const history = useHistory();
   const totalSteps = () => {
     return getSteps().length;
   };
@@ -149,21 +78,195 @@ const MenuStepper = (props: IMenuProps) => {
     return completed.has(step);
   }
 
-  const stepRender = (index: number) => {
-    switch (index) {
-      case 0:
-        return createMenu();
-      case 1:
-        return(
-          <TextField>Step 2</TextField>
-        );    
-      case 2:
-        return(
-          <Checkbox name="Step 3" />
-        );    
-      default:
-        break;
-    }
+  const handleDateChange = (date: Date | null) => {
+    setSelectedDate(date);
+  };
+
+  const mealTable  = () => {
+    return (
+      <TableContainer component={Paper}>
+        <Table aria-label="a dense table">
+          <TableBody>
+            {meals.map((meal) => (
+              <TableRow key={meal.name}>
+                <TableCell>{`${meal.name} (${meal.chef})`}</TableCell>
+                <TableCell align="right" >
+                  <IconButton color="primary">
+                    <EditIcon fontSize="small" />
+                  </IconButton>
+                  <IconButton color="secondary">
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>  
+    );
+  }
+
+  const createMenu = () => {
+    return (
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <MuiPickersUtilsProvider utils={DateFnsUtils}>
+            <KeyboardDatePicker
+                disableToolbar
+                variant="inline"
+                format="MM/dd/yyyy"
+                margin="normal"
+                id="date-picker-inline"
+                label="Dia inicial"
+                value={selectedDate}
+                onChange={handleDateChange}
+                KeyboardButtonProps={{
+                  'aria-label': 'change date',
+                }}
+              />
+          </MuiPickersUtilsProvider>
+        </Grid>
+        <Grid item xs={12}>
+          {mealTable()}
+        </Grid>
+      </Grid>
+    );
+  }
+
+
+  const onDragEnd = (result: any) => {
+    console.log('====================================');
+    console.log('Drag ended...');
+    console.log(result);
+    console.log('====================================');
+  }
+
+  const draggableName = (id: number) => "draggable-"+String(id);
+
+  const sortView = () => {
+    return (
+      <DragDropContext onDragEnd={result => onDragEnd(result)} >
+        <div key="column">
+          <div>
+            <Droppable droppableId="column" key="column">
+              {(droppableProvided, droppableSnapshot) => {
+                return (
+                  <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
+                        {meals.map((meal, index) => {
+                          return (
+                            <Draggable key={draggableName(index)} draggableId={draggableName(index)} index={index} >
+                              {(draggableProvided, draggableSnapshot) => {
+                                return (
+                                  <div 
+                                    ref={draggableProvided.innerRef}
+                                    {...draggableProvided.draggableProps}
+                                    {...draggableProvided.dragHandleProps}
+                                    style={{
+                                      userSelect: "none",
+                                      padding: 10,
+                                      margin: "0 0 8px 0",
+                                      minHeight: "10px",
+                                      borderTop: "1px solid #DFD7CA",
+                                      backgroundColor: draggableSnapshot.isDragging
+                                        ? "grey"
+                                        : "white",
+                                      color: "black",
+                                      ...draggableProvided.draggableProps.style
+                                    }}
+                                  >                                      
+                                    {meal.name}
+                                  </div>
+                                );
+                              }}
+                            </Draggable>
+                          );
+                        })}                        
+                    
+                    {droppableProvided.placeholder}
+                  </div>
+                );
+              }}
+            </Droppable>
+          </div>
+        </div>
+      </DragDropContext>      
+    );
+  }
+
+  const handleAddMeal = () => {
+    history.push('/meal/new');
+  }
+
+  const handleSortNext = () => {
+    // add dates to meals
+    handleNext();
+  }
+
+  const handleSave = () => {
+    // Save menu
+  }
+
+  const addMealButtonAction = {
+    name: 'Añadir comida',
+    action: handleAddMeal
+  } as IButtonAction;
+
+  const addMealNextButtonAction = {
+    name: 'Siguiente',
+    action: handleNext
+  } as IButtonAction;
+
+  const sortNextButtonAction = {
+    name: 'Siguiente',
+    action: handleSortNext
+  } as IButtonAction;
+
+  const backButtonAction = {
+    name: 'Atrás',
+    action: handleBack
+  } as IButtonAction;
+
+  const saveButtonAction = {
+    name: 'Guardar',
+    action: handleSave
+  } as IButtonAction;
+
+  const addMealStep = {
+    title: 'Añadir comnidas',
+    buttons: [ addMealButtonAction, addMealNextButtonAction ],
+    render: createMenu
+  } as IStepAction;
+
+  const sortStep = {
+    title: 'Ordenar',
+    buttons: [ backButtonAction, sortNextButtonAction ],
+    render: sortView
+  } as IStepAction;
+
+  const saveStep = {
+    title: 'Guardar',
+    buttons: [ backButtonAction, saveButtonAction ],
+    render: createMenu
+  } as IStepAction;
+
+  const stepsConfig = [ addMealStep, sortStep, saveStep ] as IStepAction[];
+
+  const buttonsActionRender = () => {
+    const buttons = stepsConfig[activeStep].buttons;
+    return (
+      <Grid container spacing={3} style={{padding: "40px"}}>
+        {buttons.map((button) => (
+          <Grid item xs>
+            <Button variant="outlined" color="primary" fullWidth onClick={button.action}>{button.name}</Button>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  }
+
+  const stepRender = () => {
+    const render = stepsConfig[activeStep].render;
+    return render();
   }
 
   return (
@@ -183,22 +286,10 @@ const MenuStepper = (props: IMenuProps) => {
         </Stepper>
       </Grid>
       <Grid item xs={12}>
-        {stepRender(activeStep)}
+        {stepRender()}
       </Grid>
     </Grid>
-    <Grid container spacing={3} style={{padding: "40px"}}> 
-      <Grid item xs>
-        <Button variant="outlined" color="primary" disabled={activeStep === 0} onClick={handleBack}>Back</Button>
-      </Grid>
-      <Grid item xs>
-        <Button variant="outlined" color="primary" onClick={handleBack}>Aditional</Button>
-      </Grid>
-      <Grid item xs>
-        <Button variant="outlined" color="primary" onClick={handleComplete}>
-          {completedSteps() === totalSteps() - 1 ? 'Finish' : 'Title'}
-        </Button>
-      </Grid>
-    </Grid>
+    {buttonsActionRender()}
     </div>
   );
 }

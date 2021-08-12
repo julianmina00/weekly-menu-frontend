@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { 
-  Button, Grid, TextField, Checkbox, TableContainer, Table, TableBody, 
-  TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton, CardContent, Card, Typography 
+  Button, Grid, TableContainer, Table, TableBody, 
+  TableRow, TableCell, Paper, IconButton, Stepper, Step, StepButton, Typography
 } from '@material-ui/core';
 import { Edit as EditIcon, Delete as DeleteIcon, DragIndicator as DragIndicatorIcon } from '@material-ui/icons';
 import {
   KeyboardDatePicker, MuiPickersUtilsProvider,
 } from '@material-ui/pickers';
+
+import { 
+  Timeline, TimelineItem, TimelineSeparator, 
+  TimelineConnector, TimelineContent, TimelineDot, TimelineOppositeContent
+} from '@material-ui/lab';
+
 import DateFnsUtils from '@date-io/date-fns';
+import { DragDropContext, Draggable, Droppable, DropResult } from 'react-beautiful-dnd';
 
 import { IRootState } from '../../shared/reducers';
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import { setMeals } from '../meal/meal.reducer';
+import { IMeal } from '../../model/meal.model';
 
 function getSteps() {
   return ['Añadir comidas', 'Ordenar', 'Guardar'];
@@ -29,7 +37,7 @@ interface IStepAction {
   render(): JSX.Element;
 }
 
-export type IMenuProps = StateProps;
+export interface IMenuProps extends StateProps, DispatchProps {}
 
 const MenuStepper = (props: IMenuProps) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -134,56 +142,35 @@ const MenuStepper = (props: IMenuProps) => {
   }
 
 
-  const onDragEnd = (result: any) => {
-    console.log('====================================');
-    console.log('Drag ended...');
-    console.log(result);
-    console.log('====================================');
-    if (!result.destination) return;
+  const onDragEnd = (result: DropResult): void => {
     const { source, destination } = result;
-    const mealsArray = [ ...meals ];
-    const [removed] = mealsArray.splice(source.index, 1);
-    mealsArray.splice(destination.index, 0, removed);
-    
-    // const item = itemById(result.draggableId)
-    // const itemIndex = destination.index
-    // const prev = items[itemIndex-1];
-    // const next = items[itemIndex+1];
-    // let prevPos = 0;
-    // if(prev !== undefined){
-    //   prevPos = prev.position;
-    // }
-    // let nextPos = undefined;
-    // if(next !== undefined){
-    //   nextPos = next.position;
-    // }
-    // let itemPos: number;
-    // if(nextPos === undefined){
-    //   itemPos = prevPos + 1;
-    // }
-    // else{
-    //   itemPos = prevPos + (nextPos - prevPos)/2.0;
-    // }
-    // item.position = itemPos
-    // item.changed = true;
-    // props.updateEntities(item);
+    if (!destination 
+      || (destination.droppableId === source.droppableId 
+        && destination.index === source.index)){ 
+      return;
+    }
+
+    const mealsArray = [ ...meals ] as IMeal[];
+    const [moved] = mealsArray.splice(source.index, 1);
+    mealsArray.splice(destination.index, 0, { ...moved });
+    props.setMeals(mealsArray as ReadonlyArray<IMeal>);
   }
 
   const draggableName = (id: number) => "draggable-"+String(id);
 
   const sortView = () => {
     return (
-      <DragDropContext onDragEnd={result => onDragEnd(result)} >
+      <DragDropContext onDragEnd={onDragEnd} >
         <div key="column">
           <div>
             <Droppable droppableId="column" key="column">
-              {(droppableProvided, droppableSnapshot) => {
+              {(droppableProvided) => {
                 return (
                   <div {...droppableProvided.droppableProps} ref={droppableProvided.innerRef}>
                         {meals.map((meal, index) => {
                           return (
                             <Draggable key={draggableName(index)} draggableId={draggableName(index)} index={index} >
-                              {(draggableProvided, draggableSnapshot) => {
+                              {(draggableProvided) => {
                                 return (
                                   <div ref={draggableProvided.innerRef}
                                   {...draggableProvided.draggableProps}
@@ -203,8 +190,7 @@ const MenuStepper = (props: IMenuProps) => {
                               }}
                             </Draggable>
                           );
-                        })}                        
-                    
+                        })}
                     {droppableProvided.placeholder}
                   </div>
                 );
@@ -216,12 +202,60 @@ const MenuStepper = (props: IMenuProps) => {
     );
   }
 
+  const weekday = (date: Date = new Date()): string => {
+    const day = date.toLocaleString('es-es', {  weekday: 'long' });
+    return `${day.charAt(0).toLocaleUpperCase()}${day.substr(1).toLowerCase()}`
+  }
+
+
+  const saveView = () => {
+    return (
+      <Timeline>
+        {meals.map((meal, index) => (
+        <TimelineItem key={meal.name}>
+          <TimelineOppositeContent>
+            <Typography color="textSecondary">{weekday(meal.date)}</Typography>
+          </TimelineOppositeContent>
+          <TimelineSeparator>
+            <TimelineDot />
+            {index < meals.length - 1 && (
+            <TimelineConnector />
+            )}
+          </TimelineSeparator>
+          <TimelineContent>
+            <Paper elevation={3} style={{padding: '5px 15px'}}>
+              <Typography variant="subtitle1">{meal.name}</Typography>
+              <Typography variant="subtitle2">{meal.chef}</Typography>
+            </Paper>
+          </TimelineContent>
+
+        </TimelineItem>
+        ))}
+      </Timeline>
+    );
+  }
+
+  const setDates = () => {
+    const datedMeals = [ ...meals ] as ReadonlyArray<IMeal>;
+    const date = new Date(selectedDate || new Date());
+    datedMeals.forEach((meal) => {
+      meal.date = new Date(date);
+      console.log(`${meal.name} will be cooked on: ${meal.date}`);
+      date.setDate(date.getDate() + 1);
+    });
+    console.log('====================================');
+    console.log('datedMeals:');
+    console.log(datedMeals);
+    console.log('====================================');
+    props.setMeals(datedMeals);
+  }
+
   const handleAddMeal = () => {
     history.push('/meal/new');
   }
 
   const handleSortNext = () => {
-    // add dates to meals
+    setDates();
     handleNext();
   }
 
@@ -269,7 +303,7 @@ const MenuStepper = (props: IMenuProps) => {
   const saveStep = {
     title: 'Guardar',
     buttons: [ backButtonAction, saveButtonAction ],
-    render: createMenu
+    render: saveView
   } as IStepAction;
 
   const stepsConfig = [ addMealStep, sortStep, saveStep ] as IStepAction[];
@@ -321,6 +355,11 @@ const mapStateToProps = ({ meal } : IRootState) => ({
   meals: meal.entities
 });
 
-type StateProps = ReturnType<typeof mapStateToProps>;
+const mapDispatchToProps = {
+  setMeals
+};
 
-export default connect(mapStateToProps)(MenuStepper);
+type StateProps = ReturnType<typeof mapStateToProps>;
+type DispatchProps = typeof mapDispatchToProps;
+
+export default connect(mapStateToProps, mapDispatchToProps)(MenuStepper);

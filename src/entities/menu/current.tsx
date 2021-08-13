@@ -11,6 +11,7 @@ import Alert from '@material-ui/lab/Alert';
 
 import { IMeal } from '../../model/meal.model';
 import { Link } from 'react-router-dom';
+import { weekday } from '../../shared/utils/date-helper';
 
 export interface IMenuCurrentProps {
   meals?: ReadonlyArray<IMeal>;
@@ -51,11 +52,6 @@ const MenuCurrent = (props: IMenuCurrentProps) => {
 
   const getMeals = (): ReadonlyArray<IMeal> => {
     return meals && meals.length > 0 ? meals : currentMenu;
-  }
-
-  const weekday = (date: Date = new Date()): string => {
-    const day = date.toLocaleString('es-es', {  weekday: 'long' });
-    return `${day.charAt(0).toLocaleUpperCase()}${day.substr(1).toLowerCase()}`
   }
 
   const stepper = () => {
